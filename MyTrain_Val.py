@@ -146,7 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--clip', type=float, default=0.5, help='gradient clipping margin')
     parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of learning rate')
     parser.add_argument('--decay_epoch', type=int, default=50, help='every n epochs decay learning rate')
-    parser.add_argument('--gpu_id', type=str, default='1', help='train use gpu')
+    parser.add_argument('--gpu_id', type=str, default='0', help='train use gpu')
     parser.add_argument('--train_root', type=str, default='./Dataset/TrainValDataset/',
                         help='the training rgb images root')
     parser.add_argument('--val_root', type=str, default='./Dataset/TestDataset/CAMO/',

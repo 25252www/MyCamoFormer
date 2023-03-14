@@ -87,9 +87,9 @@ class PolypObjDataset(data.Dataset):
     def __init__(self, image_root, gt_root, trainsize):
         self.trainsize = trainsize
         # get filenames
-        self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg')]
-        self.gts = [gt_root + f for f in os.listdir(gt_root) if f.endswith('.jpg')
-                    or f.endswith('.png')]
+        self.images = [image_root + f for f in os.listdir(image_root) if f.endswith('.jpg') and f.startswith('camo')]
+        self.gts = [gt_root + f for f in os.listdir(gt_root) if f.startswith('camo') and f.endswith('.jpg')
+                    or f.startswith('camo') and f.endswith('.png')]
         # self.grads = [grad_root + f for f in os.listdir(grad_root) if f.endswith('.jpg')
         #               or f.endswith('.png')]
         # self.depths = [depth_root + f for f in os.listdir(depth_root) if f.endswith('.bmp')

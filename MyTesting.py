@@ -13,7 +13,8 @@ parser.add_argument('--testsize', type=int, default=384, help='testing size')
 parser.add_argument('--pth_path', type=str, default='./snapshot/Net_epoch_best.pth')
 opt = parser.parse_args()
 
-for _data_name in ['CHAMELEON','COD10K','NC4K','CAMO']:
+# for _data_name in ['CHAMELEON','COD10K','NC4K','CAMO']:
+for _data_name in ['CAMO']:
     data_path = './Dataset/TestDataset/{}/'.format(_data_name)
     save_path = './res/{}/{}/'.format(opt.pth_path.split('/')[-2], _data_name)
     model = Network(pretrained=None, snapshot=opt.pth_path)

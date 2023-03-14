@@ -311,10 +311,14 @@ class Decoder(nn.Module):
 
         E5 = self.conv_block(E4, E3, E2)
 
-        # 加入CAB试试
-        E4 = torch.cat((E4, self.CAB(E5)),1)
-        E3 = torch.cat((E3, self.CAB(E5)),1)
-        E2 = torch.cat((E2, self.CAB(E5)),1)
+        # # 加入CAB试试
+        # E4 = torch.cat((E4, self.CAB(E5)),1)
+        # E3 = torch.cat((E3, self.CAB(E5)),1)
+        # E2 = torch.cat((E2, self.CAB(E5)),1)
+
+        E4 = torch.cat((E4, E5),1)
+        E3 = torch.cat((E3, E5),1)
+        E2 = torch.cat((E2, E5),1)
 
         E4 = F.relu(self.fuse1(E4), inplace=True)
         E3 = F.relu(self.fuse2(E3), inplace=True)
