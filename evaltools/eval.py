@@ -148,9 +148,9 @@ def eval(parser, dataset):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default='CamoFormer')
-    parser.add_argument("--pred_root", default='./res')
+    parser.add_argument("--pred_root", default='res/snapshot')
     parser.add_argument("--GT_root", default='Dataset/TestDataset')
-    parser.add_argument("--record_path", default=None)
+    parser.add_argument("--record_path", default='res/eval_record.txt')
     parser.add_argument("--BR", default='on')
     parser.add_argument("--br_rate", default=15)
     args = parser.parse_args()

@@ -58,9 +58,10 @@ def weight_init(module):
             m.initialize()
 
 class CamoFormer(torch.nn.Module):
-    def __init__(self, pretrained=None):
+    def __init__(self, pretrained=None, snapshot=None):
         super(CamoFormer, self).__init__()
         self.encoder = pvt_v2_b4()
+        self.snapshot = snapshot
         if pretrained is not None:
             pretrained_dict = torch.load(pretrained)  
             pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in self.encoder.state_dict()}
@@ -68,6 +69,7 @@ class CamoFormer(torch.nn.Module):
             print('Pretrained encoder loaded.')
 
         self.decoder = Decoder(128)
+        self.initialize()
 
     def _make_pred_layer(self, block, dilation_series, padding_series, NoLabels, input_channel):
         return block(dilation_series, padding_series, NoLabels, input_channel)
@@ -86,7 +88,13 @@ class CamoFormer(torch.nn.Module):
         P5, P4, P3, P2, P1= self.decoder(x1, x2, x3, x4, shape)
         # P1是最细腻的特征图，P5是最粗糙的特征图
         return P5, P4, P3, P2, P1
-
+    
+    def initialize(self):
+        if self.snapshot is not None:
+            self.load_state_dict(torch.load(self.snapshot))
+            print('Snapshot loaded: ' + self.snapshot)
+        else:
+            weight_init(self)
 
 
        

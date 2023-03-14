@@ -14,6 +14,56 @@ from pdb import set_trace as stx
 import numbers
 from einops import rearrange
 
+
+def conv(in_channels, out_channels, kernel_size, bias=False, stride=1):
+    return nn.Conv2d(
+        in_channels, out_channels, kernel_size,
+        padding=(kernel_size // 2), bias=bias, stride=stride)
+
+## Channel Attention Layer
+class CALayer(nn.Module):
+    def __init__(self, channel, reduction=16, bias=False):
+        super(CALayer, self).__init__()
+        # global average pooling: feature --> point
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        # feature channel downscale and upscale --> channel weight
+        self.conv_du = nn.Sequential(
+            nn.Conv2d(channel, channel // reduction, 1, padding=0, bias=bias),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(channel // reduction, channel, 1, padding=0, bias=bias),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.conv_du(y)
+        return x * y
+
+    def initialize(self):
+        weight_init(self)
+
+## Channel Attention Block (CAB)
+class CAB(nn.Module):
+    def __init__(self, n_feat, kernel_size, reduction, bias, act):
+        super(CAB, self).__init__()
+        modules_body = []
+        modules_body.append(conv(n_feat, n_feat, kernel_size, bias=bias))
+        modules_body.append(act)
+        modules_body.append(conv(n_feat, n_feat, kernel_size, bias=bias))
+
+        self.CA = CALayer(n_feat, reduction, bias=bias)
+        self.body = nn.Sequential(*modules_body)
+
+    def forward(self, x):
+        res = self.body(x)
+        res = self.CA(res)
+        res += x
+        return res
+    
+    def initialize(self):
+        weight_init(self)
+
+
 def weight_init(module):
     for n, m in module.named_children():
         if isinstance(m, nn.Conv2d):
@@ -33,6 +83,7 @@ def weight_init(module):
         elif isinstance(m, (nn.ReLU, nn.Sigmoid, nn.Softmax, nn.PReLU, nn.AdaptiveAvgPool2d, nn.AdaptiveMaxPool2d, nn.AdaptiveAvgPool1d, nn.Sigmoid, nn.Identity)):
             pass
         else:
+            print(type(m))
             m.initialize()
 
 def to_3d(x):
@@ -228,6 +279,9 @@ class Decoder(nn.Module):
 
         self.conv_block = Conv_Block(channels)
 
+        self.CAB = [CAB(channels, kernel_size=3, reduction=4 ,bias=False, act=nn.PReLU()) for _ in range(2)]
+        self.CAB = nn.Sequential(*self.CAB)
+
         self.fuse1 = nn.Sequential(nn.Conv2d(channels*2, channels, kernel_size=3, stride=1, padding=1, bias=False),nn.BatchNorm2d(channels))
         self.fuse2 = nn.Sequential(nn.Conv2d(channels*2, channels, kernel_size=3, stride=1, padding=1, bias=False),nn.BatchNorm2d(channels))
         self.fuse3 = nn.Sequential(nn.Conv2d(channels*2, channels, kernel_size=3, stride=1, padding=1, bias=False),nn.BatchNorm2d(channels))
@@ -257,9 +311,10 @@ class Decoder(nn.Module):
 
         E5 = self.conv_block(E4, E3, E2)
 
-        E4 = torch.cat((E4, E5),1)
-        E3 = torch.cat((E3, E5),1)
-        E2 = torch.cat((E2, E5),1)
+        # 加入CAB试试
+        E4 = torch.cat((E4, self.CAB(E5)),1)
+        E3 = torch.cat((E3, self.CAB(E5)),1)
+        E2 = torch.cat((E2, self.CAB(E5)),1)
 
         E4 = F.relu(self.fuse1(E4), inplace=True)
         E3 = F.relu(self.fuse2(E3), inplace=True)

@@ -141,13 +141,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epoch', type=int, default=100, help='epoch number')
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-    parser.add_argument('--batchsize', type=int, default=36, help='training batch size')
+    parser.add_argument('--batchsize', type=int, default=4, help='training batch size')
     parser.add_argument('--trainsize', type=int, default=384, help='training dataset size')
     parser.add_argument('--clip', type=float, default=0.5, help='gradient clipping margin')
     parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of learning rate')
     parser.add_argument('--decay_epoch', type=int, default=50, help='every n epochs decay learning rate')
-    parser.add_argument('--load', type=str, default=None, help='train from checkpoints')
-    parser.add_argument('--gpu_id', type=str, default='0', help='train use gpu')
+    parser.add_argument('--gpu_id', type=str, default='1', help='train use gpu')
     parser.add_argument('--train_root', type=str, default='./Dataset/TrainValDataset/',
                         help='the training rgb images root')
     parser.add_argument('--val_root', type=str, default='./Dataset/TestDataset/CAMO/',
@@ -168,14 +167,7 @@ if __name__ == '__main__':
 
     # Network可以初始化pretrained参数，用于加载encoder的预训练模型
     # 输入输出的shape一致
-    model = Network(pretrained='./checkpoint/pvt_v2_b4.pth').cuda()
-
-    if opt.load is not None:
-        model.load_state_dict(torch.load(opt.load))
-        print('load model from ', opt.load)
-    else:
-        weight_init(model)
-        print('model weights initialized')
+    model = Network(pretrained='./checkpoint/pvt_v2_b4.pth', snapshot=None).cuda()
 
     optimizer = torch.optim.Adam(model.parameters(), opt.lr)
 
@@ -200,9 +192,9 @@ if __name__ == '__main__':
                         format='[%(asctime)s-%(filename)s-%(levelname)s:%(message)s]',
                         level=logging.INFO, filemode='a', datefmt='%Y-%m-%d %I:%M:%S %p')
     logging.info("Network-Train")
-    logging.info('Config: epoch: {}; lr: {}; batchsize: {}; trainsize: {}; clip: {}; decay_rate: {}; load: {}; '
+    logging.info('Config: epoch: {}; lr: {}; batchsize: {}; trainsize: {}; clip: {}; decay_rate: {}; '
                  'save_path: {}; decay_epoch: {}'.format(opt.epoch, opt.lr, opt.batchsize, opt.trainsize, opt.clip,
-                                                         opt.decay_rate, opt.load, save_path, opt.decay_epoch))
+                                                         opt.decay_rate, save_path, opt.decay_epoch))
 
     step = 0
     writer = SummaryWriter(save_path + 'summary')

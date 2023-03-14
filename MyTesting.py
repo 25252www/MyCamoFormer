@@ -16,8 +16,7 @@ opt = parser.parse_args()
 for _data_name in ['CHAMELEON','COD10K','NC4K','CAMO']:
     data_path = './Dataset/TestDataset/{}/'.format(_data_name)
     save_path = './res/{}/{}/'.format(opt.pth_path.split('/')[-2], _data_name)
-    model = Network()
-    model.load_state_dict(torch.load(opt.pth_path))
+    model = Network(pretrained=None, snapshot=opt.pth_path)
     model.cuda()
     model.eval()
 
