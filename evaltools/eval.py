@@ -154,7 +154,8 @@ if __name__ == '__main__':
     parser.add_argument("--BR", default='on')
     parser.add_argument("--br_rate", default=15)
     args = parser.parse_args()
-    datasets = ['NC4K', 'COD10K', 'CAMO', 'CHAMELEON']
+    # datasets = ['NC4K', 'COD10K', 'CAMO', 'CHAMELEON']
+    datasets = ['CAMO']
     existed_pred = os.listdir(args.pred_root)
     for dataset in datasets:  
         if dataset in existed_pred:
