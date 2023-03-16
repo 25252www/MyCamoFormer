@@ -43,11 +43,19 @@ def train(train_loader, model, optimizer, epoch, save_path, writer):
             images = images.cuda()
             gts = gts.cuda()
 
+            # P5, P4, P3, P2, P1  = model(images) P1是最细腻的特征图，P5是最粗糙的特征图
             preds = model(images)
             
             loss = 0
+            # gamma=0.2
+            # losses = [structure_loss(preds[i], gts) for i in range(len(preds))]
+            # # reverse losses 最后一次迭代的权重最大
+            # for i in range(len(losses)):
+            #     loss += (gamma * i) * losses[i]
+
             for i in range(len(preds)):
                 loss += structure_loss(preds[i], gts)
+
 
             loss.backward()
 
@@ -62,8 +70,7 @@ def train(train_loader, model, optimizer, epoch, save_path, writer):
                 print('{} Epoch [{:03d}/{:03d}], Step [{:04d}/{:04d}], Total_loss: {:.4f}'.
                       format(datetime.now(), epoch, opt.epoch, i, total_step, loss.data))
                 logging.info(
-                    '[Train Info]:Epoch [{:03d}/{:03d}], Step [{:04d}/{:04d}], Total_loss: {:.4f} Loss1: {:.4f} '
-                    'Loss2: {:0.4f}'.
+                    '[Train Info]:Epoch [{:03d}/{:03d}], Step [{:04d}/{:04d}], Total_loss: {:.4f}'.
                     format(epoch, opt.epoch, i, total_step, loss.data))
                 # TensorboardX-Loss
                 writer.add_scalars('Loss_Statistics',
@@ -146,7 +153,7 @@ if __name__ == '__main__':
     parser.add_argument('--clip', type=float, default=0.5, help='gradient clipping margin')
     parser.add_argument('--decay_rate', type=float, default=0.1, help='decay rate of learning rate')
     parser.add_argument('--decay_epoch', type=int, default=50, help='every n epochs decay learning rate')
-    parser.add_argument('--gpu_id', type=str, default='0', help='train use gpu')
+    parser.add_argument('--gpu_id', type=str, default='1', help='train use gpu')
     parser.add_argument('--train_root', type=str, default='./Dataset/TrainValDataset/',
                         help='the training rgb images root')
     parser.add_argument('--val_root', type=str, default='./Dataset/TestDataset/CAMO/',

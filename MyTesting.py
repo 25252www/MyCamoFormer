@@ -10,7 +10,9 @@ from utils.data_val import test_dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--testsize', type=int, default=384, help='testing size')
-parser.add_argument('--pth_path', type=str, default='./snapshot/Net_epoch_best.pth')
+# parser.add_argument('--pth_path', type=str, default='./snapshot/Net_epoch_best.pth')
+parser.add_argument('--pth_path', type=str, default='./snapshot-camo-CamoFormer-CAB-30epoch/Net_epoch_best.pth')
+
 opt = parser.parse_args()
 
 # for _data_name in ['CHAMELEON','COD10K','NC4K','CAMO']:
