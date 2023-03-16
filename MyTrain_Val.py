@@ -28,7 +28,7 @@ def structure_loss(pred, mask):
     return (wbce + wiou).mean()
 
 
-def train(train_loader, model, optimizer, epoch, save_path, writer):
+def train(train_loader, model, optimizer, epoch, save_path, writer, total_epoch):
     """
     train function
     """
@@ -97,6 +97,8 @@ def train(train_loader, model, optimizer, epoch, save_path, writer):
         writer.add_scalar('Loss-epoch', loss_all, global_step=epoch)
         if epoch % 50 == 0:
             torch.save(model.state_dict(), save_path + 'Net_epoch_{}.pth'.format(epoch))
+        if epoch == total_epoch:
+            torch.save(model.state_dict(), save_path + 'Net_epoch_{}.pth'.format(epoch))
     except KeyboardInterrupt:
         print('Keyboard Interrupt: save model and exit.')
         if not os.path.exists(save_path):
@@ -146,7 +148,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--epoch', type=int, default=100, help='epoch number')
+    parser.add_argument('--epoch', type=int, default=30, help='epoch number')
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
     parser.add_argument('--batchsize', type=int, default=4, help='training batch size')
     parser.add_argument('--trainsize', type=int, default=384, help='training dataset size')
@@ -209,8 +211,8 @@ if __name__ == '__main__':
     best_epoch = 0
 
     print("Start train...")
-    for epoch in range(1, opt.epoch):
+    for epoch in range(1, opt.epoch+1):
         cur_lr = adjust_lr(optimizer, opt.lr, epoch, opt.decay_rate, opt.decay_epoch)
         writer.add_scalar('learning_rate', cur_lr, global_step=epoch)
-        train(train_loader, model, optimizer, epoch, save_path, writer)
+        train(train_loader, model, optimizer, epoch, save_path, writer,opt.epoch)
         val(val_loader, model, epoch, save_path, writer)
